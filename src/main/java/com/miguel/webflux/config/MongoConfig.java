@@ -15,7 +15,7 @@ public class MongoConfig implements InitializingBean {
     private final MappingMongoConverter converter;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         converter.setTypeMapper(new DefaultMongoTypeMapper(null));
     }
 }
