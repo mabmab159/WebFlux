@@ -3,6 +3,7 @@ package com.miguel.webflux.controller;
 import com.miguel.webflux.dto.DishDTO;
 import com.miguel.webflux.model.Dish;
 import com.miguel.webflux.service.IDishService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +45,7 @@ public class DishController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> save(@RequestBody DishDTO dto, final ServerHttpRequest request) {
+    public Mono<ResponseEntity<Object>> save(@Valid @RequestBody DishDTO dto, final ServerHttpRequest request) {
         return service.save(convertToEntity(dto))
                 .map(e -> ResponseEntity.created(
                                 URI.create(

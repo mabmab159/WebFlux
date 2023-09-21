@@ -22,7 +22,6 @@ public class MapperConfig {
     @Bean("clientMapper")
     public ModelMapper clientMapper() {
         ModelMapper mapper = new ModelMapper();
-
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         //Lectura
@@ -31,7 +30,6 @@ public class MapperConfig {
         typeMap2.addMapping(Client::getLastName, (destination, value) -> destination.setSurnameClient((String) value));
         typeMap2.addMapping(Client::getBirthDate, (destination, value) -> destination.setBirthDateClient((LocalDate) value));
         typeMap2.addMapping(Client::getUrlPhoto, (destination, value) -> destination.setUrlPhotoClient((String) value));
-
 
         //Escritura
         TypeMap<ClientDTO, Client> typeMap1 = mapper.createTypeMap(ClientDTO.class, Client.class);
