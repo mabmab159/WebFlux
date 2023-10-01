@@ -80,6 +80,18 @@ public class InvoiceController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
+    @GetMapping("/generateReport/{id}")
+    public Mono<ResponseEntity<byte[]>> generateReport(@PathVariable("id") String id) {
+        Mono<byte[]> monoReport = service.generateReport(id);
+        return monoReport
+                .map(bytes -> ResponseEntity
+                        .ok()
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .body(bytes))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     private InvoiceDTO convertToDto(Invoice model) {
         return mapper.map(model, InvoiceDTO.class);
     }
