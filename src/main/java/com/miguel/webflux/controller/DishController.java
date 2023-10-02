@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -15,6 +17,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/dishes")
@@ -80,6 +85,34 @@ public class DishController {
         return service.delete(id)
                 .flatMap(e -> e ? Mono.just(ResponseEntity.noContent().build()) : Mono.just(ResponseEntity.notFound().build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    //Practica comun | No recomendada
+    private DishDTO dishHateoas;
+
+    @GetMapping("/hateoas/{id}")
+    public Mono<EntityModel<DishDTO>> getHateOas(@PathVariable("id") String id) {
+        //localhost:8080/dishes/{id}
+        Mono<Link> monoLink = linkTo(methodOn(DishController.class).findById(id)).withSelfRel().toMono();
+
+        //Practica comun | No recomendada
+        /*return service.findById(id)
+                .map(this::convertToDto)
+                .flatMap(d -> {
+                    this.dishHateoas = d;
+                    return monoLink;
+                })
+                .map(link -> EntityModel.of(this.dishHateoas, link));*/
+
+        //Practica intermedia
+        /*return service.findById(id)
+                .map(this::convertToDto)
+                .flatMap(d -> monoLink.map(link -> EntityModel.of(d, link)));*/
+
+        //Practica ideal
+        return service.findById(id)
+                .map(this::convertToDto)
+                .zipWith(monoLink, EntityModel::of); // (d, link) -> EntityModel.of(d, link)
     }
 
     private DishDTO convertToDto(Dish model) {
