@@ -3,22 +3,32 @@ package com.miguel.webflux.handler;
 import com.miguel.webflux.dto.DishDTO;
 import com.miguel.webflux.model.Dish;
 import com.miguel.webflux.service.IDishService;
+import com.miguel.webflux.validator.RequestValidator;
+import com.miguel.webflux.validator.ValidationDTO;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+
 
 @Component
 @RequiredArgsConstructor
 public class DishHandler {
     private final IDishService service;
+    private final Validator validator;
+    private final RequestValidator requestValidator;
+
     @Qualifier("defaultMapper")
     private final ModelMapper mapper;
 
@@ -41,7 +51,30 @@ public class DishHandler {
 
     public Mono<ServerResponse> create(ServerRequest req) {
         Mono<DishDTO> monoDisthDTO = req.bodyToMono(DishDTO.class);
+
+        /*return monoDisthDTO
+                .flatMap(e -> {
+                    Errors errors = new BeanPropertyBindingResult(e, DishDTO.class.getName());
+                    validator.validate(e, errors);
+                    if (errors.hasErrors()) {
+                        return Flux.fromIterable(errors.getFieldErrors())
+                                .map(error -> new ValidationDTO(error.getField(), error.getDefaultMessage()))
+                                .collectList()
+                                .flatMap(list -> ServerResponse.badRequest()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(BodyInserters.fromValue(list))
+                                );
+                    } else {
+                        return service.save(this.convertToEntity(e))
+                                .map(this::convertToDto)
+                                .flatMap(dto -> ServerResponse
+                                        .created(URI.create(req.uri().toString().concat("/").concat(dto.getId())))
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(BodyInserters.fromValue(dto)));
+                    }
+                });*/
         return monoDisthDTO
+                .flatMap(this.requestValidator::validate)
                 .flatMap(e -> service.save(convertToEntity(e)))
                 .map(this::convertToDto)
                 .flatMap(e -> ServerResponse
@@ -58,6 +91,7 @@ public class DishHandler {
                     e.setId(id);
                     return e;
                 })
+                .flatMap(requestValidator::validate)
                 .flatMap(e -> service.update(convertToEntity(e), id))
                 .map(this::convertToDto)
                 .flatMap(e -> ServerResponse
