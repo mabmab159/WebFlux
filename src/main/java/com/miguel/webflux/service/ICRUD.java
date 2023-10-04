@@ -1,5 +1,7 @@
 package com.miguel.webflux.service;
 
+import com.miguel.webflux.pagination.PageSupport;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,4 +15,6 @@ public interface ICRUD<T, ID> {
     Mono<T> findById(ID id);
 
     Mono<Boolean> delete(ID id);
+
+    Mono<PageSupport<T>> getPage(Pageable page);
 }

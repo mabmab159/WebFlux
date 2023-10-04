@@ -2,11 +2,13 @@ package com.miguel.webflux.controller;
 
 import com.miguel.webflux.dto.DishDTO;
 import com.miguel.webflux.model.Dish;
+import com.miguel.webflux.pagination.PageSupport;
 import com.miguel.webflux.service.IDishService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
@@ -88,7 +90,7 @@ public class DishController {
     }
 
     //Practica comun | No recomendada
-    private DishDTO dishHateoas;
+    //private DishDTO dishHateoas;
 
     @GetMapping("/hateoas/{id}")
     public Mono<EntityModel<DishDTO>> getHateOas(@PathVariable("id") String id) {
@@ -113,6 +115,26 @@ public class DishController {
         return service.findById(id)
                 .map(this::convertToDto)
                 .zipWith(monoLink, EntityModel::of); // (d, link) -> EntityModel.of(d, link)
+    }
+
+    @GetMapping("/pageable")
+    public Mono<ResponseEntity<PageSupport<DishDTO>>> getPage(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "2") int size
+    ) {
+        return service.getPage(PageRequest.of(page, size))
+                .map(pageSupport -> {
+                    PageSupport<DishDTO> dtoPageSupport = new PageSupport<>(
+                            pageSupport.getContent().stream().map(this::convertToDto).toList(),
+                            pageSupport.getPageNumber(),
+                            pageSupport.getPageSize(),
+                            pageSupport.getTotalElements()
+                    );
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(dtoPageSupport);
+                })
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     private DishDTO convertToDto(Dish model) {

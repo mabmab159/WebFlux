@@ -1,9 +1,13 @@
 package com.miguel.webflux.service.Impl;
 
+import com.miguel.webflux.pagination.PageSupport;
 import com.miguel.webflux.repository.IGenericRepo;
 import com.miguel.webflux.service.ICRUD;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 public abstract class CRUDImpl<T, ID> implements ICRUD<T, ID> {
 
@@ -40,5 +44,19 @@ public abstract class CRUDImpl<T, ID> implements ICRUD<T, ID> {
                         return Mono.just(false);
                     }
                 });
+    }
+
+    @Override
+    public Mono<PageSupport<T>> getPage(Pageable page) {
+        return getRepo().findAll() //Flux<T>
+                .collectList() //Mono<List<T>>
+                .map(list -> new PageSupport<>(
+                        list.stream().skip((long) page.getPageNumber() * page.getPageSize())
+                                .limit(page.getPageSize())
+                                .collect(Collectors.toList()),
+                        page.getPageNumber(),
+                        page.getPageSize(),
+                        list.size()
+                ));
     }
 }
