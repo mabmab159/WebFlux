@@ -52,8 +52,9 @@ public class DishController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<Object>> save(@Valid @RequestBody DishDTO dto, final ServerHttpRequest request) {
+    public Mono<ResponseEntity<DishDTO>> save(@Valid @RequestBody DishDTO dto, final ServerHttpRequest request) {
         return service.save(convertToEntity(dto))
+                .map(this::convertToDto)
                 .map(e -> ResponseEntity.created(
                                 URI.create(
                                         request.getURI()
@@ -63,7 +64,7 @@ public class DishController {
                                 )
                         )
                         .contentType(MediaType.APPLICATION_JSON)
-                        .build());
+                        .body(e));
     }
 
     @PutMapping("/{id}")
