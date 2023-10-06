@@ -1,7 +1,7 @@
 package com.miguel.webflux.security;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpHeaders;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,13 +27,12 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-
         ServerHttpRequest request = exchange.getRequest();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader != null) {
             if (authHeader.startsWith("Bearer ") || authHeader.startsWith("bearer ")) {
-                final int TOKEN_POSITITION = 1;
-                String token = authHeader.split(" ")[TOKEN_POSITITION];
+                final int TOKEN_POSITION = 1;
+                String token = authHeader.split(" ")[TOKEN_POSITION];
                 Authentication auth = new UsernamePasswordAuthenticationToken(token, token);
                 return this.authenticationManager.authenticate(auth).map(SecurityContextImpl::new);
             } else {

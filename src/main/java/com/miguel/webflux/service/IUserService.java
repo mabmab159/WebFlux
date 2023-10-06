@@ -7,5 +7,5 @@ public interface IUserService extends ICRUD<User, String>{
 
     Mono<User> saveHash(User user);
 
-    Mono<com.miguel.webflux.security.User> seachByUser(String username);
+    Mono<com.miguel.webflux.security.User> searchByUser(String username);
 }

@@ -34,7 +34,7 @@ public class UserServiceImpl extends CRUDImpl<User, String> implements IUserServ
     }
 
     @Override
-    public Mono<com.miguel.webflux.security.User> seachByUser(String username) {
+    public Mono<com.miguel.webflux.security.User> searchByUser(String username) {
         Mono<User> monoUser = repo.findOneByUsername(username);
         List<String> roles = new ArrayList<>();
         return monoUser.flatMap(u -> Flux.fromIterable(u.getRoles())

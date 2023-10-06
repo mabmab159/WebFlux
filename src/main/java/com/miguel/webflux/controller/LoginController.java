@@ -25,7 +25,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public Mono<ResponseEntity<?>> login(@RequestBody AuthRequest authRequest) {
-        return service.seachByUser(authRequest.getUsername())
+        return service.searchByUser(authRequest.getUsername())
                 .map(userDetails -> {
                     if (BCrypt.checkpw(authRequest.getPassword(), userDetails.getPassword())) {
                         String token = jwtUtil.generateToken(userDetails);
