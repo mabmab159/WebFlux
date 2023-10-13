@@ -2,7 +2,6 @@ package com.miguel.webflux.controller;
 
 import com.miguel.webflux.model.Menu;
 import com.miguel.webflux.service.IMenuService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
