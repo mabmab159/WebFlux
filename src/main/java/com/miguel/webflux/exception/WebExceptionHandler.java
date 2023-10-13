@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@Order(-1) //Ordered.HIGHEST_PRECEDENCE
+@Order(-1)
 public class WebExceptionHandler extends AbstractErrorWebExceptionHandler {
 
     public WebExceptionHandler(ErrorAttributes errorAttributes, WebProperties.Resources resources,
@@ -56,14 +56,9 @@ public class WebExceptionHandler extends AbstractErrorWebExceptionHandler {
                 customError.put("status", 401);
                 status = HttpStatus.UNAUTHORIZED;
             }
-            case "500" -> {
-                customError.put("message", error.getMessage());
-                customError.put("status", 500);
-            }
             default -> {
                 customError.put("message", error.getMessage());
-                customError.put("status", 418);
-                status = HttpStatus.I_AM_A_TEAPOT;
+                customError.put("status", 500);
             }
         }
 

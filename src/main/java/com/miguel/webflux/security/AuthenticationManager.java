@@ -24,7 +24,12 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         if (user != null && jwtUtil.validateToken(token)) {
             Claims claims = jwtUtil.getAllClaimsFromToken(token);
             List<String> roles = claims.get("roles", List.class);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, roles.stream().map(SimpleGrantedAuthority::new).toList());
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(user,
+                            null,
+                            roles.stream()
+                                    .map(SimpleGrantedAuthority::new)
+                                    .toList());
             return Mono.just(auth);
         } else {
             return Mono.error(new InterruptedException("Token not valid or expired"));
